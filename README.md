@@ -2,7 +2,7 @@
 
 Public dashboard for tracking Fucina Nexus Foundation fundraising outreach.
 
-**Live:** [fnp-dashboard.netlify.app](https://fnp-dashboard.netlify.app) *(after Netlify setup)*
+**Live:** [fnp-dashboard.netlify.app](https://fnp-dashboard.netlify.app)
 
 ## About
 
