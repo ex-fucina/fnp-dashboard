@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNP Fundraising Dashboard</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: var(--gray-100);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logo span {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            font-weight: 400;
+        }
+
+        .last-updated {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+        }
+
+        /* Pipeline Section */
+        .pipeline-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pipeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding: 1rem 0;
+        }
+
+        .pipeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 4px;
+            background: var(--gray-700);
+            border-radius: 2px;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .pipeline-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .stage-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .stage-circle.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .stage-circle.empty {
+            background: var(--gray-700);
+            color: var(--gray-500);
+        }
+
+        .stage-label {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--gray-300) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .metric-card.highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        /* Active Pipeline Table */
+        .table-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--gray-400);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-researched {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .status-contacted {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .status-submitted {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+        }
+
+        .status-funded {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .app-ready {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--success);
+            font-size: 0.875rem;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tier-1 { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+        .tier-2 { background: rgba(156, 163, 175, 0.2); color: #d1d5db; }
+        .tier-3 { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
+
+        /* Materials Section */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .material-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .material-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .material-info h4 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .material-info span {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .material-status {
+            margin-left: auto;
+            color: var(--success);
+        }
+
+        /* Two Column Layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Activity Feed */
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content p {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-content time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding-top: 2rem;
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">⚒️</div>
+                <div>
+                    <h1>Fundraising Dashboard</h1>
+                    <span>Fucina Nexus Foundation</span>
+                </div>
+            </div>
+            <div class="last-updated">
+                Last updated: <strong>2026-02-02</strong>
+            </div>
+        </header>
+
+        <!-- Pipeline Visualization -->
+        <section class="pipeline-section">
+            <h2 class="section-title">📊 Pipeline Status</h2>
+            <div class="pipeline">
+                <div class="pipeline-stage">
+                    <div class="stage-circle active">1</div>
+                    <span class="stage-label">Researched</span>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="stage-circle empty">0</div>
+                    <span class="stage-label">Contacted</span>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="stage-circle empty">0</div>
+                    <span class="stage-label">Replied</span>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="stage-circle empty">0</div>
+                    <span class="stage-label">In Discussion</span>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="stage-circle empty">0</div>
+                    <span class="stage-label">Submitted</span>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="stage-circle empty">0</div>
+                    <span class="stage-label">Funded</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card highlight">
+                <div class="metric-value">1</div>
+                <div class="metric-label">Active in Pipeline</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">9</div>
+                <div class="metric-label">Targets Identified</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">1</div>
+                <div class="metric-label">Applications Ready</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">0</div>
+                <div class="metric-label">Submitted</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">$0</div>
+                <div class="metric-label">Total Funded</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">—</div>
+                <div class="metric-label">Success Rate</div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div>
+                <!-- Active Pipeline -->
+                <section class="table-section">
+                    <h2 class="section-title">🎯 Active Pipeline</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Target</th>
+                                <th>Program</th>
+                                <th>Tier</th>
+                                <th>Status</th>
+                                <th>Application</th>
+                                <th>Next Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ethereum Foundation</strong></td>
+                                <td>ESP</td>
+                                <td><span class="tier-badge tier-1">Tier 1</span></td>
+                                <td><span class="status-badge status-researched">🟡 Researched</span></td>
+                                <td><span class="app-ready">✓ Ready</span></td>
+                                <td>DD review → submit</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Target Queue -->
+                <section class="table-section">
+                    <h2 class="section-title">📋 Target Queue</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Target</th>
+                                <th>Program</th>
+                                <th>Tier</th>
+                                <th>Alignment</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Protocol Labs</td>
+                                <td>Grants</td>
+                                <td><span class="tier-badge tier-1">Tier 1</span></td>
+                                <td>⭐⭐⭐</td>
+                                <td style="color: var(--gray-500)">Not started</td>
+                            </tr>
+                            <tr>
+                                <td>Optimism</td>
+                                <td>RetroPGF</td>
+                                <td><span class="tier-badge tier-1">Tier 1</span></td>
+                                <td>⭐⭐⭐</td>
+                                <td style="color: var(--gray-500)">Not started</td>
+                            </tr>
+                            <tr>
+                                <td>Uniswap Foundation</td>
+                                <td>Grants</td>
+                                <td><span class="tier-badge tier-2">Tier 2</span></td>
+                                <td>⭐⭐</td>
+                                <td style="color: var(--gray-500)">Not started</td>
+                            </tr>
+                            <tr>
+                                <td>Compound</td>
+                                <td>Grants</td>
+                                <td><span class="tier-badge tier-2">Tier 2</span></td>
+                                <td>⭐⭐</td>
+                                <td style="color: var(--gray-500)">Not started</td>
+                            </tr>
+                            <tr>
+                                <td>Gitcoin</td>
+                                <td>Grants</td>
+                                <td><span class="tier-badge tier-2">Tier 2</span></td>
+                                <td>⭐⭐</td>
+                                <td style="color: var(--gray-500)">Not started</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <div>
+                <!-- Recent Activity -->
+                <section class="table-section">
+                    <h2 class="section-title">⚡ Recent Activity</h2>
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-content">
+                            <p><strong>ESP application drafted</strong> — Ready for review</p>
+                            <time>2026-02-02</time>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-content">
+                            <p><strong>Research complete</strong> — Ethereum ESP requirements gathered</p>
+                            <time>2026-02-02</time>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-content">
+                            <p><strong>Pitch materials created</strong> — One-pager, deck, bio, budget</p>
+                            <time>2026-02-02</time>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-content">
+                            <p><strong>Tracking system initialized</strong></p>
+                            <time>2026-02-02</time>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Materials -->
+                <section class="table-section">
+                    <h2 class="section-title">📁 Materials</h2>
+                    <div class="materials-grid" style="grid-template-columns: 1fr;">
+                        <div class="material-card">
+                            <div class="material-icon">📄</div>
+                            <div class="material-info">
+                                <h4>One-Pager</h4>
+                                <span>FNP-one-pager.md</span>
+                            </div>
+                            <div class="material-status">✓</div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">📊</div>
+                            <div class="material-info">
+                                <h4>Pitch Deck</h4>
+                                <span>FNP-pitch-deck.md</span>
+                            </div>
+                            <div class="material-status">✓</div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">👤</div>
+                            <div class="material-info">
+                                <h4>DD Bio</h4>
+                                <span>DD-bio.md</span>
+                            </div>
+                            <div class="material-status">✓</div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">💰</div>
+                            <div class="material-info">
+                                <h4>Budget Template</h4>
+                                <span>budget-template.md</span>
+                            </div>
+                            <div class="material-status">✓</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <footer>
+            <p>Fucina Nexus Foundation ETS · <a href="https://github.com/ex-fucina/fnp-ops">GitHub</a> · Updated manually from TRACKER.md</p>
+        </footer>
+    </div>
+</body>
+</html>
